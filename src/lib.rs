@@ -9,6 +9,7 @@ pub use near_sdk_contract_tools::owner::OwnerExternal;
 pub struct VestingContract {
     token_contract: AccountId,
     allocations: std::collections::HashMap<AccountId, Allocation>,
+    blacklists: std::collections::HashSet<AccountId>,
     lockin_block_length: u128,
     unlock_block_length: u128,
     lock_all_accounts: bool,
@@ -36,6 +37,7 @@ impl VestingContract {
         let mut contract = Self {
             token_contract,
             allocations: std::collections::HashMap::new(),
+            blacklists: std::collections::HashSet::new(),
             lockin_block_length,
             unlock_block_length,
             lock_all_accounts: false,
@@ -52,6 +54,8 @@ impl VestingContract {
     }
 
     pub fn release_vested_tokens(&mut self) {
+        require!(!self.lock_all_accounts, "All accounts are locked");
+        require!(!self.blacklists.contains(&env::predecessor_account_id()), "Account is in blacklist");
         // Perform checks and calculations...
         let allocation = self
             .allocations
@@ -107,6 +111,16 @@ impl VestingContract {
         self.owner_only();
         self.lock_all_accounts = lock_all_accounts;
     }
+
+    pub fn add_account_to_blacklist(&mut self, account_id: AccountId) {
+        self.owner_only();
+        self.blacklists.insert(account_id);
+    }
+
+    pub fn remove_account_from_blacklist(&mut self, account_id: AccountId) {
+        self.owner_only();
+        self.blacklists.remove(&account_id);
+    }
     // pub fn set_per_block_release_amount(&mut self, per_block_release_amount: Balance) {
     //     self.per_block_release_amount = per_block_release_amount;
     // }
@@ -121,6 +135,7 @@ impl Default for VestingContract {
         Self {
             token_contract: AccountId::new_unchecked("".to_string()),
             allocations: std::collections::HashMap::new(),
+            blacklists: std::collections::HashSet::new(),
             lockin_block_length: 0,
             unlock_block_length: 0,
             lock_all_accounts: false
