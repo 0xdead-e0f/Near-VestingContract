@@ -11,6 +11,7 @@ pub struct VestingContract {
     allocations: std::collections::HashMap<AccountId, Allocation>,
     lockin_block_length: u128,
     unlock_block_length: u128,
+    lock_all_accounts: bool,
     // Other vesting-related fields...
 }
 
@@ -37,6 +38,7 @@ impl VestingContract {
             allocations: std::collections::HashMap::new(),
             lockin_block_length,
             unlock_block_length,
+            lock_all_accounts: false,
             // Initialize other vesting-related fields...
         };
 
@@ -101,6 +103,10 @@ impl VestingContract {
         self.allocations.insert(account_id, allocation);
     }
 
+    pub fn set_lock_all_accounts(&mut self, lock_all_accounts: bool) {
+        self.owner_only();
+        self.lock_all_accounts = lock_all_accounts;
+    }
     // pub fn set_per_block_release_amount(&mut self, per_block_release_amount: Balance) {
     //     self.per_block_release_amount = per_block_release_amount;
     // }
@@ -116,7 +122,8 @@ impl Default for VestingContract {
             token_contract: AccountId::new_unchecked("".to_string()),
             allocations: std::collections::HashMap::new(),
             lockin_block_length: 0,
-            unlock_block_length: 0
+            unlock_block_length: 0,
+            lock_all_accounts: false
             // Set default values for other fields...
         }
     }
