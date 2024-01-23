@@ -1,5 +1,6 @@
 [package]
 name = "contract"
+categories = ["wasm"]
 version = "1.0.0"
 authors = ["Near Inc <hello@near.org>"]
 edition = "2021"
@@ -9,6 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 near-sdk = "4.0.0"
+near-sdk-contract-tools = "2.1.0"
 uint = { version = "0.9.3", default-features = false }
 
 
